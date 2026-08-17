@@ -19,8 +19,6 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          packages: 'platform-tools platforms;android-37 build-tools;37.0.0'
 
       - name: Generate debug keystore for release signing
         run: |
@@ -49,7 +47,7 @@ jobs:
           path: app/build/outputs/apk/universal/foss/release/*.apk
           retention-days: 30
 
-      - name: Rename and release
+      - name: Rename APK
         run: |
           cd app/build/outputs/apk/universal/foss/release/
           cp app-universal-foss-release.apk vivi-music-jiosaavn-universal-foss-release.apk
