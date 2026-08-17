@@ -31,18 +31,15 @@ jobs:
           p = 'app/src/main/kotlin/com/music/vivi/playback/DownloadUtil.kt'
           with open(p) as f:
               c = f.read()
-          # Remove copyToPublicDownloads call
           c = c.replace('\n                                    copyToPublicDownloads(download.request.id)', '')
-          # Remove the entire copyToPublicDownloads method
           c = re.sub(r'\n    private fun copyToPublicDownloads\(.*?\n    \}\n', '', c, flags=re.DOTALL)
-          # Remove extra imports that were added for public downloads
           c = c.replace('import android.os.Environment\n', '')
           c = c.replace('import java.io.File\n', '')
           c = c.replace('import java.io.FileOutputStream\n', '')
           c = c.replace('import androidx.media3.datasource.DataSpec\n', '')
           with open(p, 'w') as f:
               f.write(c)
-          print('Fixed DownloadUtil.kt - removed public downloads code')
+          print('Fixed DownloadUtil.kt')
           "
 
       - name: Generate app icons
@@ -93,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: svara-apk
-          path: app/build/outputs/apk/universal/foss/debug/*.apk
+          path: app/build/outputs/apk/universalFoss/debug/*.apk
           if-no-files-found: error
 
       - name: Rename and prepare APK
