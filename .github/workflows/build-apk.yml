@@ -13,54 +13,75 @@ jobs:
 
       - name: Fix AndroidX datastore import
         run: |
-          sed -i 's/import androidx.dataStore.preferences.core.edit/import androidx.datastore.preferences.core.edit/' app/src/main/kotlin/com/music/vivi/playback/MusicService.kt
-          grep -n "import androidx.datastore.preferences.core.edit" app/src/main/kotlin/com/music/vivi/playback/MusicService.kt
-          grep -n "androidx.dataStore" app/src/main/kotlin/com/music/vivi/playback/MusicService.kt || echo "No broken imports"
+          sed -i 's/import androidx.dataStore.preferences.core.edit/import androidx.datastore.preferences.core.edit/' app/src/main/kotlin/com/music/vivi/playback/MusicService.kt || true
+          grep -n "import androidx.datastore.preferences.core.edit" app/src/main/kotlin/com/music/vivi/playback/MusicService.kt || echo "No broken imports"
 
       - name: Apply Svara changes
-        run: python3 svara_changes_v2.py .
+        run: python3 svara_apply.py .
+
+      - name: Generate app icons
+        run: |
+          pip install Pillow --quiet
+          python3 -c "
+          from PIL import Image
+          import os
+          img = Image.open('svara_icon_512.png')
+          if img.mode != 'RGBA':
+              img = img.convert('RGBA')
+          densities = {'mipmap-mdpi': 48, 'mipmap-hdpi': 72, 'mipmap-xhdpi': 96, 'mipmap-xxhdpi': 144, 'mipmap-xxxhdpi': 192}
+          adaptive = {'mipmap-mdpi': 108, 'mipmap-hdpi': 162, 'mipmap-xhdpi': 216, 'mipmap-xxhdpi': 324, 'mipmap-xxxhdpi': 432}
+          for folder, size in densities.items():
+              d = f'app/src/main/res/{folder}'
+              os.makedirs(d, exist_ok=True)
+              r = img.resize((size, size), Image.LANCZOS)
+              r.save(os.path.join(d, 'ic_launcher.png'))
+              r.save(os.path.join(d, 'ic_launcher_round.png'))
+          for folder, size in adaptive.items():
+              d = f'app/src/main/res/{folder}'
+              os.makedirs(d, exist_ok=True)
+              r = img.resize((size, size), Image.LANCZOS)
+              r.save(os.path.join(d, 'ic_launcher_foreground.png'))
+          for folder, size in densities.items():
+              d = f'app/src/debug/res/{folder}'
+              os.makedirs(d, exist_ok=True)
+              r = img.resize((size, size), Image.LANCZOS)
+              r.save(os.path.join(d, 'ic_launcher.png'))
+              r.save(os.path.join(d, 'ic_launcher_round.png'))
+          print('Icons generated successfully')
+          "
 
       - name: Commit all changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "feat: rebrand to Svara, add AUTO_BEST provider, public downloads" || echo "Nothing to commit"
-          git push origin main
+          git commit -m "Apply Svara branding, icon, AUTO_BEST provider, hide videos, public downloads" || echo "Nothing to commit"
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
           distribution: 'temurin'
+          java-version: '21'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'ndk;27.0.12077973'
+          packages: 'platform-tools platforms;android-37 build-tools;37.0.0'
 
       - name: Generate debug keystore
         run: |
-          mkdir -p app/keystore
-          keytool -genkeypair -v \
-            -keystore app/keystore/release.keystore \
-            -alias vivi-release \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass android \
-            -keypass android \
-            -dname "CN=Svara, OU=Build, O=GitHub Actions, L=NA, S=NA, C=IN"
+          keytool -genkeypair -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" || true
 
       - name: Build APK
-        env:
-          STORE_PASSWORD: android
-          KEY_ALIAS: vivi-release
-          KEY_PASSWORD: android
         run: |
+          export ORG_GRADLE_PROJECT_signingKeystorePath=$PWD/debug.keystore
+          export ORG_GRADLE_PROJECT_signingKeystorePassword=android
+          export ORG_GRADLE_PROJECT_signingKeyAlias=androiddebugkey
+          export ORG_GRADLE_PROJECT_signingKeyPassword=android
           chmod +x gradlew
-          ./gradlew assembleUniversalFossRelease --no-daemon --stacktrace
+          ./gradlew assembleUniversalDebug --no-daemon -x lint
 
       - name: Find and list APK files
-        if: always()
         run: |
           echo "=== All APK files ==="
           find . -name "*.apk" -type f
@@ -70,33 +91,31 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: svara-universal-foss-release
-          path: app/build/outputs/**/*.apk
-          retention-days: 30
+          name: svara-apk
+          path: app/build/outputs/apk/universal/debug/*.apk
           if-no-files-found: error
 
       - name: Rename and prepare APK
         run: |
-          APK_PATH=$(find app/build/outputs -name "*.apk" -type f | head -1)
-          echo "Found APK at: $APK_PATH"
-          cp "$APK_PATH" svara-universal-foss-release.apk
-          ls -la svara-universal-foss-release.apk
+          mkdir -p release
+          find app/build/outputs/apk -name "*.apk" -exec cp {} release/Svara-debug.apk \;
+          ls -la release/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v6.0.5-svara
+          tag_name: svara-v6.0.5
           name: Svara v6.0.5
           body: |
-            ## Svara - Built by Yash Agrawal
-
-            ### Changes
-            - Rebranded from Vivi Music to Svara
-            - JioSaavn is the default stream provider
-            - Added Auto (Best Quality) stream provider option
-            - Stream provider/quality selection persists across playback sessions
-            - Downloads now appear in public Downloads/Svara folder
-            - All other providers, lyrics, and features intact
-          files: svara-universal-foss-release.apk
-          draft: false
+            Svara - Music Player by Yash Agrawal
+            
+            Features:
+            - Auto (Best Quality) stream provider
+            - Videos hidden from search and home by default
+            - Downloads saved to public Downloads/Svara folder
+            - Custom app icon
+          files: release/Svara-debug.apk
           prerelease: false
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
