@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fix Androidx datastore import
+      - name: Fix AndroidX datastore import
         run: |
           sed -i 's/import androidx.dataStore.preferences.core.edit/import androidx.datastore.preferences.core.edit/' app/src/main/kotlin/com/music/vivi/playback/MusicService.kt
           grep -n "import androidx.datastore.preferences.core.edit" app/src/main/kotlin/com/music/vivi/playback/MusicService.kt
@@ -73,7 +73,7 @@ jobs:
           name: svara-universal-foss-release
           path: app/build/outputs/**/*.apk
           retention-days: 30
-           if-no-files-found: error
+          if-no-files-found: error
 
       - name: Rename and prepare APK
         run: |
@@ -98,5 +98,5 @@ jobs:
             - Downloads now appear in public Downloads/Svara folder
             - All other providers, lyrics, and features intact
           files: svara-universal-foss-release.apk
-           draft: false
-           prerelease: false
+          draft: false
+          prerelease: false
