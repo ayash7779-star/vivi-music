@@ -47,15 +47,12 @@ jobs:
 
       - name: Generate debug keystore
         run: |
-          keytool -genkeypair -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" || true
+          mkdir -p /home/runner/.android
+          keytool -genkeypair -v -keystore /home/runner/.android/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
       - name: Build APK
         run: |
           export ANDROID_HOME=/usr/local/lib/android/sdk
-          export ORG_GRADLE_PROJECT_signingKeystorePath=$PWD/debug.keystore
-          export ORG_GRADLE_PROJECT_signingKeystorePassword=android
-          export ORG_GRADLE_PROJECT_signingKeyAlias=androiddebugkey
-          export ORG_GRADLE_PROJECT_signingKeyPassword=android
           chmod +x gradlew
           ./gradlew assembleUniversalFossDebug --no-daemon -x lint
 
