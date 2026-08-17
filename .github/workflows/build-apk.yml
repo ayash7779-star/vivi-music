@@ -57,7 +57,7 @@ jobs:
           export ORG_GRADLE_PROJECT_signingKeyAlias=androiddebugkey
           export ORG_GRADLE_PROJECT_signingKeyPassword=android
           chmod +x gradlew
-          ./gradlew assembleUniversalDebug --no-daemon -x lint
+          ./gradlew assembleUniversalFossDebug --no-daemon -x lint
 
       - name: Find and list APK files
         run: |
@@ -70,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: svara-apk
-          path: app/build/outputs/apk/universal/debug/*.apk
+          path: app/build/outputs/apk/universal/foss/debug/*.apk
           if-no-files-found: error
 
       - name: Rename and prepare APK
