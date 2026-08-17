@@ -42,7 +42,10 @@ jobs:
           print('Fixed DownloadUtil.kt')
           "
 
-      - name: Generate app icons
+      - name: Fix WelcomeActivity (developer name, remove community/features pages)
+        run: python3 fix_welcome.py
+
+      - name: Generate app icons from user icon
         run: |
           pip install Pillow --quiet
           python3 generate_icon.py
@@ -52,7 +55,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Apply Svara branding, icon, AUTO_BEST provider, hide videos" || echo "Nothing to commit"
+          git commit -m "Apply Svara branding, icon, AUTO_BEST provider, hide videos, fix setup screens" || echo "Nothing to commit"
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -96,22 +99,23 @@ jobs:
       - name: Rename and prepare APK
         run: |
           mkdir -p release
-          find app/build/outputs/apk -name "*.apk" -exec cp {} release/Svara-debug.apk \;
+          find app/build/outputs/apk -name "*.apk" -exec cp {} release/Svara.apk \;
           ls -la release/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: svara-v6.0.5
-          name: Svara v6.0.5
+          tag_name: svara-v6.0.6
+          name: Svara v6.0.6
           body: |
             Svara - Music Player by Yash Agrawal
             
             Features:
             - Auto (Best Quality) stream provider
             - Videos hidden from search and home by default
-            - Custom app icon
-          files: release/Svara-debug.apk
+            - Custom स्वर app icon
+            - Clean setup screens (no Telegram/community links)
+          files: release/Svara.apk
           prerelease: false
           draft: false
         env:
