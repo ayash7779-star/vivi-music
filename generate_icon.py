@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Generate Svara app icons from the user's actual ‡§∏‡•ç‡§µ‡§∞ icon."""
+# -*- coding: utf-8 -*-
+"""Generate Svara app icons from the user's actual Svara icon."""
 from PIL import Image
 import os, io, base64
 
@@ -22,7 +23,7 @@ ICON_B64 = (
     "+z7dDEmm1qQxT3HB5SyU9aw8P5ZjUBwc+Kd1wfJV2EOhzHsam2dtoaibQNntVKD1cWqtNNuS4KHu"
     "tSEr13Hml6DrGVlKt1egIKVJUErSpI2ziBJV6rEoVKmVKe+iLBhsrkSH3DolttCSpSj4AAn2YGPc"
     "u0y9UrnrmYszeTVaiTFo8Zw6mnwkk9WgdyuO8r+UUs/JRpK3pCr+VY+zbVWG1br1elsUkaK0JbUS"
-    "48Pa00tP5WA75k3y+kCK26Q6U7iSD8UfKV6ydffjU50Z3NvPOfXqik21IMiUonrHlHeS34DvP0DG"
+    "48Pa00tP5WA75k3y+kCK26Q6U7iSD8UfKV6ydffjU50Z3NvPOfXqi+21IMiUonrHlHeS34DvP0DG"
     "lpElyS6p15xTrizqpajqThKXOPPXHusxLdCgKxWnUnCYOBI3lnQDFPlTjnBobg9I8/8AtiBctxtg"
     "AurCfDtPswldqx10YZ/Lc/RiymNx1OpJ5k4r6oAHTAJnpEqTqHHlFPopOg9wwmMUA+OMgpIGLakj"
     "AIlMgYoUkJwpcHDCZzAW9eOPoSFdmKCdMUpc0OAlNsNbQ9WyezKpcJt5b0Vx1SojBVoFLVp1sXX0"
@@ -34,7 +35,7 @@ ICON_B64 = (
     "FcyN6V/LzNW9oFsV2j1ixpVQdSxEmzpiZERTqjolC1pCS3qToCQRrzIxtfbF2uansg0+h1iXY0i6"
     "reqjyognxqt5OqPICSoNuIU2r4yQopUD8hQIB01AJ4sO7lcrQuE+qkyP1Mff2PbzWOFm3GfVR5P6"
     "mCHjps6aOWUtQPrr6fssePTaQRyyim+2vD7HADwOWt7q5WVcv5mk/qYp/YuvpXKyLmP8zSf1MHFy"
-    "q2t/2T9lCs51NwyqnogRahKTRVzisrEUqBSXdwaFW6fknTUc8RF/duYyhqMo5JB/38PscAPI5T36"
+    "q2t/2T9lCs51NWyqnogRahKTRVzisrEUqBSXdwaFW6fknTUc8RF/duYyhqMo5JB/38PscAPI5T36"
     "vlYtzn1UWT9ni2rJ3MFXKwrpP8ySvs8GU2TOkksnahuv70X6TNs27HW1OxIUuSHmZgSNVJbdAT54"
     "AJ3SBqAdNdMYba26QSubJWYLFu1vLFdYgVBgyqZWItdU23KaB3VAoLRKFoOgUnU80kHRQwAiqfkF"
     "mhWZaI0LLi7JL6zoEIokn+9GF+ZWRtUyVprLF8PM0q75gS4xbDTqXZcVk8eul7pKWdRwQ0TvnUqI"
@@ -46,7 +47,7 @@ ICON_B64 = (
     "pLIyNctu11hlAQ7R6hd8+MEndT1yZNJbQD4fCq4Yx0HbFu/ZMbpFkwsoobGXVvqegPvuOr8snPMS"
     "DGmS1OoJbStchKwN5J+SnUgDAQHrdBqVJqz9JmU6XBrLDnUqgyGFtSEO9iCggKCtdNBprxGmCYdK"
     "Lms5T9mrLHL6uOIVeFQVCqM5lxQ32vJ4246tXdq8tSR37qu7EobquO272yURn3l5YlDzIuWHSvL6"
-    "O7PjoTNCEa77Xc3FLDjWi/gwQdUkJIJGsHbS6Wcy7TajZjZS0e9a/GKlR6g2Wm2VkklJLbjS9wga"
+    "O7PjoTNCEa77Yc3FLDjWi/gwQdUkJIJGsHbS6Wcy7TajZjZS0e9a/GKlR6g2Wm2VkklJLbjS9wga"
     "DVB46a6a4Bp7E+wQznNRZOYmZkt+2stoIW43qsRnKilA1cc6xX4OOkDi5zUdQnTQnG9IubHR8s1M"
     "Wn96VOXC3/JzW3aNJUyTy3vKSvrdPx9PHGx9rO8bizr6MhF5URlDT1Xp9OqVWi0sHcZih0GQ0ga6"
     "7jZCQfxW1a9uA5BpIb5DTTXX+/AHsunKiz8m9iDMagWG649ajlvVaoQVLk+UpCH2lu6Ic5qR53mk"
@@ -161,4 +162,4 @@ for folder, size in adaptive.items():
     r = source.resize((size, size), Image.LANCZOS)
     r.save(os.path.join(d, 'ic_launcher_foreground.png'))
 
-print("All icon densities generated from user's ‡§∏‡•ç‡§µ‡§∞Å•çΩ∏à§(
+print("All icon densities generated from user's Svara icon")
