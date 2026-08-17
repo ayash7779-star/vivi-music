@@ -26,7 +26,8 @@ import com.music.innertube.models.YouTubeClient.Companion.WEB_CREATOR
 import com.music.innertube.models.YouTubeClient.Companion.WEB_REMIX
 import com.music.innertube.models.response.PlayerResponse
 import com.music.vivi.constants.AudioQuality
-import com.music.vivi.constants.EnableSaavnStreamingKey
+import com.music.vivi.constants.StreamProvider
+import com.music.vivi.constants.StreamProviderKey
 import com.music.vivi.constants.SaavnAudioQuality
 import com.music.vivi.constants.SaavnAudioQualityKey
 import com.music.vivi.utils.YTPlayerUtils.MAIN_CLIENT
@@ -144,8 +145,9 @@ object YTPlayerUtils {
         // URL from JioSaavn first. We fall through to YouTube on ANY failure so
         // the user always hears audio.
         if (context != null) {
-            val saavnEnabled = context.dataStore.get(EnableSaavnStreamingKey, false)
-            if (saavnEnabled) {
+            val providerStr = context.dataStore.get(StreamProviderKey, StreamProvider.JIOSAAVN.name)
+            val provider = StreamProvider.fromValue(providerStr)
+            if (provider == StreamProvider.JIOSAAVN) {
                 Timber.tag(TAG).d("JioSaavn streaming enabled — trying Saavn for videoId=$videoId")
                 val saavnResult = runCatching {
                     // Step 1: fetch YouTube Music next items and player metadata concurrently

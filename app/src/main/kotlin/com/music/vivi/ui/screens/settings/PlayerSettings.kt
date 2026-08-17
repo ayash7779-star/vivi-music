@@ -42,7 +42,8 @@ import com.music.vivi.constants.AudioNormalizationKey
 import com.music.vivi.constants.AudioOffload
 import com.music.vivi.constants.AudioQuality
 import com.music.vivi.constants.AudioQualityKey
-import com.music.vivi.constants.EnableSaavnStreamingKey
+import com.music.vivi.constants.StreamProvider
+import com.music.vivi.constants.StreamProviderKey
 import com.music.vivi.constants.SaavnAudioQuality
 import com.music.vivi.constants.SaavnAudioQualityKey
 import com.music.vivi.constants.AutoDownloadOnLikeKey
@@ -187,16 +188,20 @@ fun PlayerSettings(
         HistoryDuration,
         defaultValue = 30f
     )
-    val (saavnEnabled, _) = rememberPreference(
-        EnableSaavnStreamingKey,
-        defaultValue = false
-    )
     val (saavnQuality, _) = rememberEnumPreference(
         SaavnAudioQualityKey,
         defaultValue = SaavnAudioQuality.QUALITY_320
     )
 
+    val (streamProvider, onStreamProviderChange) = rememberEnumPreference(
+        StreamProviderKey,
+        defaultValue = StreamProvider.JIOSAAVN
+    )
+
     var showAudioQualityDialog by remember {
+        mutableStateOf(false)
+    }
+    var showStreamProviderDialog by remember {
         mutableStateOf(false)
     }
 
@@ -280,13 +285,31 @@ fun PlayerSettings(
                     onClick = { showAudioQualityDialog = true },
                     isExpressive = true
                 ))
-                // JioSaavn settings navigation
+                // Stream provider selection
+                add(Material3SettingsItem(
+                    icon = painterResource(R.drawable.graphic_eq),
+                    title = { Text(stringResource(R.string.stream_provider)) },
+                    description = {
+                        Text(
+                            when (streamProvider) {
+                                StreamProvider.JIOSAAVN -> if (saavnQuality == SaavnAudioQuality.QUALITY_320)
+                                    "${StreamProvider.JIOSAAVN.displayName} * ${saavnQuality.toLabel()}"
+                                 else
+                                    "${StreamProvider.JIOSAAVN.displayName} * ${saavnQuality.toLabel()}"
+                                 else -> streamProvider.displayName
+                             }
+                        )
+                    },
+                    onClick = { showStreamProviderDialog = true },
+                    isExpressive = true
+                ))
+                // JioSaavn quality settings navigation
                 add(Material3SettingsItem(
                     icon = painterResource(R.drawable.graphic_eq),
                     title = { Text(stringResource(R.string.jiosaavn_settings)) },
                     description = {
                         Text(
-                            if (saavnEnabled) {
+                            if (streamProvider == StreamProvider.JIOSAAVN) {
                                 saavnQuality.toLabel()
                             } else {
                                 stringResource(R.string.jiosaavn_streaming_disabled)

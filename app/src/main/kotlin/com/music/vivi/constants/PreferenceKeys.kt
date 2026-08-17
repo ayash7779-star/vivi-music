@@ -125,7 +125,25 @@ enum class AudioQuality {
 
 val AudioOffload = booleanPreferencesKey("enableOffload")
 
-// JioSaavn streaming
+// Stream provider selection -- replaces the old boolean Saavn toggle.
+// JIOSAAVN is the default so music is fetched from JioSaavn first,
+// falling back to YouTube Music if a match isn't found.
+val StreamProviderKey = stringPreferencesKey("streamProvider")
+
+enum class StreamProvider(val displayName: String) {
+    JIOSAAVN("JioSaavn"),
+    YOUTUBE_MUSIC("YouTube Music"),
+    SPOTIFY("Spotify"),
+    APPLE_MUSIC("Apple Music"),
+    TIDAL("Tidal");
+
+    companion object {
+        fun fromValue(value: String?): StreamProvider =
+            entries.find { it.name == value } ?: JIOSAAVN
+    }
+}
+
+// Kept for backward-compatible migration and JioSettings UI
 val EnableSaavnStreamingKey = booleanPreferencesKey("enableSaavnStreaming")
 val SaavnAudioQualityKey    = stringPreferencesKey("saavnAudioQuality")
 

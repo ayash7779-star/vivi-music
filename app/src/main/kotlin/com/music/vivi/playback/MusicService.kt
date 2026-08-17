@@ -82,6 +82,9 @@ import com.music.vivi.R
 import com.music.vivi.constants.AudioNormalizationKey
 import com.music.vivi.constants.AudioOffload
 import com.music.vivi.constants.AudioQualityKey
+import com.music.vivi.constants.StreamProvider
+import com.music.vivi.constants.StreamProviderKey
+import com.music.vivi.constants.SaavnAudioQualityKey
 import com.music.vivi.constants.AutoDownloadOnLikeKey
 import com.music.vivi.constants.AutoLoadMoreKey
 import com.music.vivi.constants.AutoSkipNextOnErrorKey
@@ -694,6 +697,67 @@ class MusicService :
                     if (wasPlaying) {
                         player.play()
                     }
+                }
+        }
+
+        // BUG FIX: Watch for stream provider changes - clear cache and reload
+        scope.launch {
+            datastore.data
+                .map { it[StreamProviderKey]?.let { v -> StreamProvider.fromValue(v) }
+                    ?: StreamProvider.JIOSAAVN }
+                .distinctUntilChanged()
+                .collect { newProvider ->
+                    Timber.tag("MusicService").i("STREAM PROVIDER: $newProvider")
+                    if (isFirstQualityEmit) return@collect
+                    Timber.tag("MusicService").i("STREAM PROVIDER CHANGED -> $newProvider")
+                    val mediaId = player.currentMediaItem?.mediaId ?: return@collect
+                    val currentPosition = player.currentPosition
+                    val currentIndex = player.currentMediaItemIndex
+                    val wasPlaying = player.isPlaying
+                    songUrlCache.clear()
+                    runBlocking(Dispatchers.IO) {
+                        try {
+                            playerCache.removeResource(mediaId)
+                            downloadCache.removeResource(mediaId)
+                        } catch (e: Exception) {
+                            Timber.tag("MusicService").e(e, "Failed to clear cache on provider change")
+                        }
+                    }
+                    bypassCacheForQualityChange.add(mediaId)
+                    player.stop()
+                    player.seekTo(currentIndex, currentPosition)
+                    player.prepare()
+                    if (wasPlaying) player.play()
+                }
+        }
+
+        // BUG FIX: Watch for Saavn audio quality changes - clear cache and reload
+        scope.launch {
+            datastore.data
+                .map { it[SaavnAudioQualityKey] ?: com.music.vivi.constants.SaavnAudioQuality.QUALITY_320.name }
+                .distinctUntilChanged()
+                .collect { newSaavnQuality ->
+                    Timber.tag("MusicService").i("SAAVN QUALITY: $newSaavnQuality")
+                    if (isFirstQualityEmit) return@collect
+                    Timber.tag("MusicService").i("SAAVN QUALITY CHANGED -> $newSaavnQuality")
+                    val mediaId = player.currentMediaItem?.mediaId ?: return@collect
+                    val currentPosition = player.currentPosition
+                    val currentIndex = player.currentMediaItemIndex
+                    val wasPlaying = player.isPlaying
+                    songUrlCache.clear()
+                    runBlocking(Dispatchers.IO) {
+                        try {
+                            playerCache.removeResource(mediaId)
+                            downloadCache.removeResource(mediaId)
+                        } catch (e: Exception) {
+                            Timber.tag("MusicService").e(e, "Failed to clear cache on Saavn quality change")
+                        }
+                    }
+                    bypassCacheForQualityChange.add(mediaId)
+                    player.stop()
+                    player.seekTo(currentIndex, currentPosition)
+                    player.prepare()
+                    if (wasPlaying) player.play()
                 }
         }
 

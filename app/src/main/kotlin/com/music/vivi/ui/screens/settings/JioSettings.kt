@@ -36,7 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.music.vivi.LocalPlayerAwareWindowInsets
 import com.music.vivi.R
-import com.music.vivi.constants.EnableSaavnStreamingKey
+import com.music.vivi.constants.StreamProvider
+import com.music.vivi.constants.StreamProviderKey
 import com.music.vivi.constants.SaavnAudioQuality
 import com.music.vivi.constants.SaavnAudioQualityKey
 import com.music.vivi.ui.component.IconButton
@@ -53,10 +54,14 @@ fun JioSettings(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    val (saavnEnabled, onSaavnEnabledChange) = rememberPreference(
-        EnableSaavnStreamingKey,
-        defaultValue = false
+    val (streamProvider, onStreamProviderChange) = rememberEnumPreference(
+        StreamProviderKey,
+        defaultValue = StreamProvider.JIOSAAVN
     )
+    val saavnEnabled = streamProvider == StreamProvider.JIOSAAVN
+    val onSaavnEnabledChange: (Boolean) -> Unit = { enable ->
+        onStreamProviderChange(if (enable) StreamProvider.JIOSAAVN else StreamProvider.YOUTUBE_MUSIC)
+    }
     val (saavnQuality, onSaavnQualityChange) = rememberEnumPreference(
         SaavnAudioQualityKey,
         defaultValue = SaavnAudioQuality.QUALITY_320

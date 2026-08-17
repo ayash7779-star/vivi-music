@@ -66,8 +66,9 @@ import com.music.vivi.ui.component.Material3MenuItemData
 import com.music.vivi.ui.component.NewAction
 import com.music.vivi.ui.component.NewActionGrid
 import com.music.vivi.ui.component.VolumeSlider
-import com.music.vivi.constants.EnableSaavnStreamingKey
-import com.music.vivi.utils.rememberPreference
+import com.music.vivi.constants.StreamProvider
+import com.music.vivi.constants.StreamProviderKey
+import com.music.vivi.utils.rememberEnumPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -108,7 +109,8 @@ fun OldPlayerMenu(
     val librarySong by database.song(mediaMetadata.id).collectAsState(initial = null)
     val repeatMode by playerConnection.repeatMode.collectAsState()
     val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
-    val (saavnEnabled) = rememberPreference(EnableSaavnStreamingKey, defaultValue = false)
+    val (streamProvider) = rememberEnumPreference(StreamProviderKey, defaultValue = StreamProvider.JIOSAAVN)
+    val saavnEnabled = streamProvider == StreamProvider.JIOSAAVN
 
     val artists = remember(mediaMetadata.artists) {
         mediaMetadata.artists.filter { it.id != null }
