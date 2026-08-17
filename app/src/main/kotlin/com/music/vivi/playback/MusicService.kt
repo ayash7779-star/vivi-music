@@ -29,7 +29,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
-import androidx.datastore.preferences.core.edit
+import androidx.dataStore.preferences.core.edit
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -702,7 +702,7 @@ class MusicService :
 
         // BUG FIX: Watch for stream provider changes - clear cache and reload
         scope.launch {
-            datastore.data
+            dataStore.data
                 .map { it[StreamProviderKey]?.let { v -> StreamProvider.fromValue(v) }
                     ?: StreamProvider.JIOSAAVN }
                 .distinctUntilChanged()
@@ -733,7 +733,7 @@ class MusicService :
 
         // BUG FIX: Watch for Saavn audio quality changes - clear cache and reload
         scope.launch {
-            datastore.data
+            dataStore.data
                 .map { it[SaavnAudioQualityKey] ?: com.music.vivi.constants.SaavnAudioQuality.QUALITY_320.name }
                 .distinctUntilChanged()
                 .collect { newSaavnQuality ->

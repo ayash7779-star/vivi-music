@@ -69,6 +69,7 @@ import com.music.vivi.ui.component.VolumeSlider
 import com.music.vivi.constants.StreamProvider
 import com.music.vivi.constants.StreamProviderKey
 import com.music.vivi.utils.rememberEnumPreference
+import com.music.vivi.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
