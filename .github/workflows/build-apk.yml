@@ -13,12 +13,8 @@ jobs:
 
       - name: Fix broken AndroidX datastore import
         run: |
-          # The previous fix script incorrectly changed androidx.datastore -> androidx.dataStore
-          # Restore the correct lowercase 'datastore' in the AndroidX import
           sed -i 's/import androidx.dataStore.preferences.core.edit/import androidx.datastore.preferences.core.edit/' app/src/main/kotlin/com/music/vivi/playback/MusicService.kt
-          # Verify the fix
           grep -n "import androidx.datastore.preferences.core.edit" app/src/main/kotlin/com/music/vivi/playback/MusicService.kt
-          # Also check no other androidx.dataStore imports are broken
           grep -n "androidx.dataStore" app/src/main/kotlin/com/music/vivi/playback/MusicService.kt || echo "No broken imports found"
 
       - name: Commit fix
@@ -60,31 +56,32 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleUniversalFossRelease --no-daemon --stacktrace
 
-      - name: Upload APK artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: vivi-music-universal-foss-release
-          path: app/build/outputs/apk/universal/foss/release/*.apk
-          retention-days: 30
-
-      - name: Upload build logs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs
-          path: |
-            app/build/reports/
-          retention-days: 7
-
-      - name: Rename APK
-        if: success()
+      - name: Find and list APK files
         run: |
-          cd app/build/outputs/apk/universal/foss/release/
-          cp app-universal-foss-release.apk vivi-music-jiosaavn-universal-foss-release.apk
+          echo "=== All APK files ==="
+          find . -name "*.apk" -type f
+          echo "=== APK directory structure ==="
+          find app/build/outputs -type f -name "*.apk" || echo "No APK in outputs"
+          echo "=== Full outputs dir ==="
+          find app/build/outputs -type d || echo "No outputs dir"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivi-music-jiosaavn-apk
+          path: |
+            app/build/outputs/**/*.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Rename and prepare APK
+        run: |
+          APK_PATH=$(find app/build/outputs -name "*.apk" -type f | head -1)
+          echo "Found APK at: $APK_PATH"
+          cp "$APK_PATH" vivi-music-jiosaavn-universal-foss-release.apk
+          ls -la vivi-music-jiosaavn-universal-foss-release.apk
 
       - name: Create GitHub Release
-        if: success()
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v6.0.5-jiosaavn
@@ -97,7 +94,6 @@ jobs:
             - Stream provider cache is cleared and playback reloads on provider/quality change
             - All other providers remain available
             - All lyrics providers and features intact
-          files: |
-            app/build/outputs/apk/universal/foss/release/vivi-music-jiosaavn-universal-foss-release.apk
+          files: vivi-music-jiosaavn-universal-foss-release.apk
           draft: false
           prerelease: false
