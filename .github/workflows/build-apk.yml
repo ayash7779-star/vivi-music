@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Svara APK
 
 on:
   workflow_dispatch:
@@ -11,18 +11,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fix broken AndroidX datastore import
+      - name: Fix Androidx datastore import
         run: |
           sed -i 's/import androidx.dataStore.preferences.core.edit/import androidx.datastore.preferences.core.edit/' app/src/main/kotlin/com/music/vivi/playback/MusicService.kt
           grep -n "import androidx.datastore.preferences.core.edit" app/src/main/kotlin/com/music/vivi/playback/MusicService.kt
-          grep -n "androidx.dataStore" app/src/main/kotlin/com/music/vivi/playback/MusicService.kt || echo "No broken imports found"
+          grep -n "androidx.dataStore" app/src/main/kotlin/com/music/vivi/playback/MusicService.kt || echo "No broken imports"
 
-      - name: Commit fix
+      - name: Apply Svara changes
+        run: python3 svara_changes_v2.py .
+
+      - name: Commit all changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "fix: restore correct androidx.datastore import casing" || echo "Nothing to commit"
+          git commit -m "feat: rebrand to Svara, add AUTO_BEST provider, public downloads" || echo "Nothing to commit"
           git push origin main
 
       - name: Set up JDK 21
@@ -45,7 +48,7 @@ jobs:
             -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass android \
             -keypass android \
-            -dname "CN=Vivi Music, OU=Build, O=GitHub Actions, L=NA, S=NA, C=IN"
+            -dname "CN=Svara, OU=Build, O=GitHub Actions, L=NA, S=NA, C=IN"
 
       - name: Build APK
         env:
@@ -57,43 +60,43 @@ jobs:
           ./gradlew assembleUniversalFossRelease --no-daemon --stacktrace
 
       - name: Find and list APK files
+        if: always()
         run: |
           echo "=== All APK files ==="
           find . -name "*.apk" -type f
-          echo "=== APK directory structure ==="
-          find app/build/outputs -type f -name "*.apk" || echo "No APK in outputs"
-          echo "=== Full outputs dir ==="
+          echo "=== outputs dir ==="
           find app/build/outputs -type d || echo "No outputs dir"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: vivi-music-jiosaavn-apk
-          path: |
-            app/build/outputs/**/*.apk
+          name: svara-universal-foss-release
+          path: app/build/outputs/**/*.apk
           retention-days: 30
-          if-no-files-found: error
+           if-no-files-found: error
 
       - name: Rename and prepare APK
         run: |
           APK_PATH=$(find app/build/outputs -name "*.apk" -type f | head -1)
           echo "Found APK at: $APK_PATH"
-          cp "$APK_PATH" vivi-music-jiosaavn-universal-foss-release.apk
-          ls -la vivi-music-jiosaavn-universal-foss-release.apk
+          cp "$APK_PATH" svara-universal-foss-release.apk
+          ls -la svara-universal-foss-release.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v6.0.5-jiosaavn
-          name: Vivi Music v6.0.5 (JioSaavn Default)
+          tag_name: v6.0.5-svara
+          name: Svara v6.0.5
           body: |
-            ## Changes
+            ## Svara - Built by Yash Agrawal
 
-            - JioSaavn is now the default stream provider
-            - Fixed critical bug: stream provider and quality selection now persists across playback sessions
-            - Stream provider cache is cleared and playback reloads on provider/quality change
-            - All other providers remain available
-            - All lyrics providers and features intact
-          files: vivi-music-jiosaavn-universal-foss-release.apk
-          draft: false
-          prerelease: false
+            ### Changes
+            - Rebranded from Vivi Music to Svara
+            - JioSaavn is the default stream provider
+            - Added Auto (Best Quality) stream provider option
+            - Stream provider/quality selection persists across playback sessions
+            - Downloads now appear in public Downloads/Svara folder
+            - All other providers, lyrics, and features intact
+          files: svara-universal-foss-release.apk
+           draft: false
+           prerelease: false
