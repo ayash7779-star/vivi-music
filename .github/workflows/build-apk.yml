@@ -22,33 +22,7 @@ jobs:
       - name: Generate app icons
         run: |
           pip install Pillow --quiet
-          python3 -c "
-          from PIL import Image
-          import os
-          img = Image.open('svara_icon_512.png')
-          if img.mode != 'RGBA':
-              img = img.convert('RGBA')
-          densities = {'mipmap-mdpi': 48, 'mipmap-hdpi': 72, 'mipmap-xhdpi': 96, 'mipmap-xxhdpi': 144, 'mipmap-xxxhdpi': 192}
-          adaptive = {'mipmap-mdpi': 108, 'mipmap-hdpi': 162, 'mipmap-xhdpi': 216, 'mipmap-xxhdpi': 324, 'mipmap-xxxhdpi': 432}
-          for folder, size in densities.items():
-              d = f'app/src/main/res/{folder}'
-              os.makedirs(d, exist_ok=True)
-              r = img.resize((size, size), Image.LANCZOS)
-              r.save(os.path.join(d, 'ic_launcher.png'))
-              r.save(os.path.join(d, 'ic_launcher_round.png'))
-          for folder, size in adaptive.items():
-              d = f'app/src/main/res/{folder}'
-              os.makedirs(d, exist_ok=True)
-              r = img.resize((size, size), Image.LANCZOS)
-              r.save(os.path.join(d, 'ic_launcher_foreground.png'))
-          for folder, size in densities.items():
-              d = f'app/src/debug/res/{folder}'
-              os.makedirs(d, exist_ok=True)
-              r = img.resize((size, size), Image.LANCZOS)
-              r.save(os.path.join(d, 'ic_launcher.png'))
-              r.save(os.path.join(d, 'ic_launcher_round.png'))
-          print('Icons generated successfully')
-          "
+          python3 generate_icon.py
 
       - name: Commit all changes
         run: |
