@@ -38,9 +38,12 @@ jobs:
           java-version: '21'
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: 'platform-tools platforms;android-37 build-tools;37.0.0'
+        run: |
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export PATH=$PATH:$ANDROID_HOME/cmdline-tools/16.0/bin:$ANDROID_HOME/platform-tools
+          sdkmanager --list_installed 2>/dev/null || true
+          sdkmanager "platforms;android-37" "build-tools;37.0.0" || true
+          echo "SDK setup done"
 
       - name: Generate debug keystore
         run: |
@@ -48,6 +51,7 @@ jobs:
 
       - name: Build APK
         run: |
+          export ANDROID_HOME=/usr/local/lib/android/sdk
           export ORG_GRADLE_PROJECT_signingKeystorePath=$PWD/debug.keystore
           export ORG_GRADLE_PROJECT_signingKeystorePassword=android
           export ORG_GRADLE_PROJECT_signingKeyAlias=androiddebugkey
